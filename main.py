@@ -1,5 +1,6 @@
 # libraries
-import math
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 # Classes
@@ -24,7 +25,7 @@ class Param:
         if order == 0:
             return self.sp_ratio()
         else:
-            return self.sp_ratio() * (math.sin(self.sp_ratio() * math.pi * order) / (self.sp_ratio() * math.pi * order))
+            return self.sp_ratio() * (np.sin(self.sp_ratio() * np.pi * order) / (self.sp_ratio() * np.pi * order))
 
     # Runs filter based on wavelength and NA
     def sin_theta(self, order):
@@ -89,13 +90,53 @@ def delta_filter(ui):
 
 # Un-transform filtered delta functions
 def delta_processing(ui):
+    print("Building intensity curves...\n")
     # Get size of list for making cosine series
     terms = len(ui.delta_loc_list)
+
+    # Scaling setup
+    u_o = 1 / ui.pitch
+    x = np.arange(-ui.pitch, ui.pitch, 0.1)
+
+    # Function builder **This for sure can be cleaner...**
+    if terms == 1:
+        mag_0 = ui.delta_mag_list[0]
+        m_prime = mag_0
+    elif terms == 2:
+        mag_0 = ui.delta_mag_list[0]
+        mag_1 = ui.delta_mag_list[1]
+        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x)
+    elif terms == 3:
+        mag_0 = ui.delta_mag_list[0]
+        mag_1 = ui.delta_mag_list[1]
+        mag_2 = ui.delta_mag_list[2]
+        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/3) * mag_2 * np.cos(6 * np.pi * u_o * x)
+    elif terms == 4:
+        mag_0 = ui.delta_mag_list[0]
+        mag_1 = ui.delta_mag_list[1]
+        mag_2 = ui.delta_mag_list[2]
+        mag_3 = ui.delta_mag_list[3]
+        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/3) * mag_2 * np.cos(6 * np.pi * u_o * x) + (2/5) * mag_3 * np.cos(10 * np.pi * u_o * x)
+    elif terms == 5:
+        mag_0 = ui.delta_mag_list[0]
+        mag_1 = ui.delta_mag_list[1]
+        mag_2 = ui.delta_mag_list[2]
+        mag_3 = ui.delta_mag_list[3]
+        mag_4 = ui.delta_mag_list[4]
+        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/3) * mag_2 * np.cos(6 * np.pi * u_o * x) + (2/5) * mag_3 * np.cos(10 * np.pi * u_o * x) + (2/7) * mag_4 * np.cos(14 * np.pi * u_o * x)
+    else:
+        m_prime = .5
+
+    # Function plotter
+    intensity = np.square(m_prime)
+    plt.plot(x, intensity)
+    plt.show()
 
 
 # Run
 ui = read_in()
 delta_filter(ui)
+delta_processing(ui)
 
 print(ui.delta_mag_list)
 print(ui.delta_loc_list)
