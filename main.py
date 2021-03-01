@@ -45,16 +45,16 @@ def read_in():
         wavelength = input("Wavelength (nm): ")
 
         # Error checking
-        if space >= pitch:
-            print("Space is larger than pitch. Please reenter.")
-        elif float(na_lens) > 1.51:
-            print("NA can not achieve a value higher than 1.51. Please reenter.")
+        #if space >= pitch:
+        #    print("Space is larger than pitch. Please reenter.")
+        #elif float(na_lens) > 1.51:
+        #    print("NA can not achieve a value higher than 1.51. Please reenter.")
 
         # Errors passed
-        else:
-            exit_cond = input("\nIs this correct?\nPitch: " + pitch + "nm\nSpace: " + space + "nm\nNA: " + na_lens + "\nWavelength: " + wavelength + "nm\n(Y or N?): ")
-            if exit_cond.lower() in ["y", "yes"]:
-                break
+        #else:
+        exit_cond = input("\nIs this correct?\nPitch: " + pitch + "nm\nSpace: " + space + "nm\nNA: " + na_lens + "\nWavelength: " + wavelength + "nm\n(Y or N?): ")
+        if exit_cond.lower() in ["y", "yes"]:
+            break
 
     # Store in Param class
     ui_init = Param(pitch, space, na_lens, wavelength)
