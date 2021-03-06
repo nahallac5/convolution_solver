@@ -106,20 +106,20 @@ def delta_processing(ui):
         mag_0 = ui.delta_mag_list[0]
         mag_1 = ui.delta_mag_list[1]
         mag_2 = ui.delta_mag_list[2]
-        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/3) * mag_2 * np.cos(6 * np.pi * u_o * x)
+        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/2) * mag_2 * np.cos(4 * np.pi * u_o * x)
     elif terms == 4:
         mag_0 = ui.delta_mag_list[0]
         mag_1 = ui.delta_mag_list[1]
         mag_2 = ui.delta_mag_list[2]
         mag_3 = ui.delta_mag_list[3]
-        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/3) * mag_2 * np.cos(6 * np.pi * u_o * x) + (2/5) * mag_3 * np.cos(10 * np.pi * u_o * x)
+        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/2) * mag_2 * np.cos(4 * np.pi * u_o * x) + (2/3) * mag_3 * np.cos(6 * np.pi * u_o * x)
     elif terms == 5:
         mag_0 = ui.delta_mag_list[0]
         mag_1 = ui.delta_mag_list[1]
         mag_2 = ui.delta_mag_list[2]
         mag_3 = ui.delta_mag_list[3]
         mag_4 = ui.delta_mag_list[4]
-        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/3) * mag_2 * np.cos(6 * np.pi * u_o * x) + (2/5) * mag_3 * np.cos(10 * np.pi * u_o * x) + (2/7) * mag_4 * np.cos(14 * np.pi * u_o * x)
+        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/2) * mag_2 * np.cos(4 * np.pi * u_o * x) + (2/3) * mag_3 * np.cos(6 * np.pi * u_o * x) + (2/4) * mag_4 * np.cos(8 * np.pi * u_o * x)
     else:
         m_prime = np.array([.5 for i in range(len(x))])
 
