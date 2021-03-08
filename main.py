@@ -31,6 +31,16 @@ class Param:
     def sin_theta(self, order):
         return (order * self.wavelength) / self.pitch
 
+    # Returns min sigma for partial coherence
+    def min_sig(self):
+        min_sig = ((self.wavelength / self.pitch) - self.NA) / self.NA
+        if min_sig < 0:
+            return 0
+        elif min_sig > 1:
+            return 1
+        else:
+            return min_sig
+
 
 # Read in function for user input
 def read_in():
@@ -148,8 +158,9 @@ def delta_processing(ui):
 
     # Text for figure variables
     param_text = "Parameters:\n=======\nPitch: " + str(ui.pitch) + "nm\nSpace: " + str(ui.space) + "nm\nNA: " + str(ui.NA) + "\nλ: " + str(ui.wavelength) + "nm\n\n"
-    test_text = "Tests:\n=======\nILS: " + "{:.2e}".format(ils) + "nm$^{-1}$\nNILS: " + format(nils, ".3f") + "\nImage Cont: " + str(image_contrast)
-    out_text = param_text + test_text
+    test_text = "Tests:\n=======\nILS: " + "{:.2e}".format(ils) + "nm$^{-1}$\nNILS: " + format(nils, ".3f") + "\nImage Cont: " + str(image_contrast) + "\n\n"
+    part_co_text = "Part. Coherence:\n=======\n\u03C3: " + format(ui.min_sig(), ".3f") 
+    out_text = param_text + test_text + part_co_text
 
     # Set up figure
     fig = plt.figure()
