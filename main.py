@@ -1,17 +1,19 @@
 # libraries
 import matplotlib.pyplot as plt
 import numpy as np
-
+import sympy as sp
 
 # Classes
 class Param:
     # Basic Variables
-    def __init__(self, pitch, space, na_lens, wavelength):
+    def __init__(self, pitch, space, na_lens, wavelength, attenuation):
         # User input
         self.pitch = float(pitch)
         self.space = float(space)
         self.NA = float(na_lens)
         self.wavelength = float(wavelength)
+        # HW 8 New Phase Shift
+        self.attenuation = float(attenuation)
         # Storage Arrays
         self.delta_mag_list = []
         self.delta_loc_list = []
@@ -23,9 +25,9 @@ class Param:
     # Gets magnitudes of the orders of delta functions
     def order_mag(self, order):
         if order == 0:
-            return self.sp_ratio()
+            return self.sp_ratio() * (1 + np.sqrt(self.attenuation)) - np.sqrt(self.attenuation)
         else:
-            return self.sp_ratio() * (np.sin(self.sp_ratio() * np.pi * order) / (self.sp_ratio() * np.pi * order))
+            return (1 + np.sqrt(self.attenuation)) * (self.sp_ratio() * (np.sin(self.sp_ratio() * np.pi * order) / (self.sp_ratio() * np.pi * order)))
 
     # Runs filter based on wavelength and NA
     def sin_theta(self, order):
@@ -53,6 +55,7 @@ def read_in():
         space = input("Space (nm): ")
         na_lens = input("NA: ")
         wavelength = input("Wavelength (nm): ")
+        attenuation = input("Attenuation % (deci): ")
 
         # Error checking
         #if space >= pitch:
@@ -62,12 +65,12 @@ def read_in():
 
         # Errors passed
         #else:
-        exit_cond = input("\nIs this correct?\nPitch: " + pitch + "nm\nSpace: " + space + "nm\nNA: " + na_lens + "\nWavelength: " + wavelength + "nm\n(Y or N?): ")
+        exit_cond = input("\nIs this correct?\nPitch: " + pitch + "nm\nSpace: " + space + "nm\nNA: " + na_lens + "\nWavelength: " + wavelength + "nm\nAttenuation: " + attenuation + "\n(Y or N?): ")
         if exit_cond.lower() in ["y", "yes"]:
             break
 
     # Store in Param class
-    ui_init = Param(pitch, space, na_lens, wavelength)
+    ui_init = Param(pitch, space, na_lens, wavelength, attenuation)
     return ui_init
 
 
@@ -104,6 +107,7 @@ def delta_processing(ui):
     # Scaling setup
     u_o = 1 / ui.pitch
     x = np.arange(-1.0 * ui.pitch, 1.0 * ui.pitch, 0.01)
+    """
     # Function builder **This for sure can be cleaner...**
     if terms == 1:
         mag_0 = ui.delta_mag_list[0]
@@ -132,7 +136,33 @@ def delta_processing(ui):
         m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/2) * mag_2 * np.cos(4 * np.pi * u_o * x) + (2/3) * mag_3 * np.cos(6 * np.pi * u_o * x) + (2/4) * mag_4 * np.cos(8 * np.pi * u_o * x)
     else:
         m_prime = np.array([.5 for i in range(len(x))])
+    """
+    # If just zero term, make an exit condition
+    if len(ui.delta_loc_list) == 1:
+        print(ui.delta_loc_list)
+        m_prime = np.array([ui.delta_mag_list[0] for i in range(len(x))])
+    
+    # Building time
+    else:
+        # Set sympy up for x var
+        x_var = sp.symbols('x')
+        # Init output expression to be subbed into
+        out_expression = None
+        # Loop over index of all relevent vars
+        for index in range(len(ui.delta_loc_list)):
+            # Simple conidtion for 0 index
+            if index == 0:
+                out_expression = ui.delta_mag_list[index]
+            # Builds equation for rest of them...
+            # Use 2n-1 to incriment up odd numbers
+            else:
+                #odd_inc = 2 * index - 1
+                out_expression = out_expression + 2 / index * ui.delta_mag_list[index] * sp.cos(2 * index * sp.pi * u_o * x_var)
 
+        # Time to sub in x array
+        # Lambdify allows a list to be fed into equation
+        f = sp.lambdify(x_var, out_expression)
+        m_prime = f(x)
     # Function plotter
     intensity = np.square(m_prime)
 
@@ -157,7 +187,7 @@ def delta_processing(ui):
     nils = ils * cd
 
     # Text for figure variables
-    param_text = "Parameters:\n=======\nPitch: " + str(ui.pitch) + "nm\nSpace: " + str(ui.space) + "nm\nNA: " + str(ui.NA) + "\nλ: " + str(ui.wavelength) + "nm\n\n"
+    param_text = "Parameters:\n=======\nPitch: " + str(ui.pitch) + "nm\nSpace: " + str(ui.space) + "nm\nNA: " + str(ui.NA) + "\nλ: " + str(ui.wavelength) + "nm\nAtten: " + str(ui.attenuation) + "\n\n"
     test_text = "Tests:\n=======\nILS: " + "{:.2e}".format(ils) + "nm$^{-1}$\nNILS: " + format(nils, ".3f") + "\nImage Cont: " + str(image_contrast) + "\n\n"
     part_co_text = "Part. Coherence:\n=======\n\u03C3: " + format(ui.min_sig(), ".3f") 
     out_text = param_text + test_text + part_co_text
