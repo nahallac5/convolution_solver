@@ -23,6 +23,7 @@ class Param:
         return self.space / self.pitch
 
     # Gets magnitudes of the orders of delta functions
+    # Now added in attenuation shifting. At 0, this does nothing so no issue having it around all the time
     def order_mag(self, order):
         if order == 0:
             return self.sp_ratio() * (1 + np.sqrt(self.attenuation)) - np.sqrt(self.attenuation)
@@ -56,12 +57,6 @@ def read_in():
         na_lens = input("NA: ")
         wavelength = input("Wavelength (nm): ")
         attenuation = input("Attenuation % (deci): ")
-
-        # Error checking
-        #if space >= pitch:
-        #    print("Space is larger than pitch. Please reenter.")
-        #elif float(na_lens) > 1.51:
-        #    print("NA can not achieve a value higher than 1.51. Please reenter.")
 
         # Errors passed
         #else:
@@ -101,42 +96,11 @@ def delta_filter(ui):
 # Un-transform filtered delta functions
 def delta_processing(ui):
     print("Building intensity curves...\n")
-    # Get size of list for making cosine series
-    terms = len(ui.delta_loc_list)
 
     # Scaling setup
     u_o = 1 / ui.pitch
     x = np.arange(-1.0 * ui.pitch, 1.0 * ui.pitch, 0.01)
-    """
-    # Function builder **This for sure can be cleaner...**
-    if terms == 1:
-        mag_0 = ui.delta_mag_list[0]
-        m_prime = np.array([mag_0 for i in range(len(x))])
-    elif terms == 2:
-        mag_0 = ui.delta_mag_list[0]
-        mag_1 = ui.delta_mag_list[1]
-        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x)
-    elif terms == 3:
-        mag_0 = ui.delta_mag_list[0]
-        mag_1 = ui.delta_mag_list[1]
-        mag_2 = ui.delta_mag_list[2]
-        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/2) * mag_2 * np.cos(4 * np.pi * u_o * x)
-    elif terms == 4:
-        mag_0 = ui.delta_mag_list[0]
-        mag_1 = ui.delta_mag_list[1]
-        mag_2 = ui.delta_mag_list[2]
-        mag_3 = ui.delta_mag_list[3]
-        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/2) * mag_2 * np.cos(4 * np.pi * u_o * x) + (2/3) * mag_3 * np.cos(6 * np.pi * u_o * x)
-    elif terms == 5:
-        mag_0 = ui.delta_mag_list[0]
-        mag_1 = ui.delta_mag_list[1]
-        mag_2 = ui.delta_mag_list[2]
-        mag_3 = ui.delta_mag_list[3]
-        mag_4 = ui.delta_mag_list[4]
-        m_prime = mag_0 + 2 * mag_1 * np.cos(2 * np.pi * u_o * x) + (2/2) * mag_2 * np.cos(4 * np.pi * u_o * x) + (2/3) * mag_3 * np.cos(6 * np.pi * u_o * x) + (2/4) * mag_4 * np.cos(8 * np.pi * u_o * x)
-    else:
-        m_prime = np.array([.5 for i in range(len(x))])
-    """
+
     # If just zero term, make an exit condition
     if len(ui.delta_loc_list) == 1:
         print(ui.delta_loc_list)
@@ -154,9 +118,7 @@ def delta_processing(ui):
             if index == 0:
                 out_expression = ui.delta_mag_list[index]
             # Builds equation for rest of them...
-            # Use 2n-1 to incriment up odd numbers
             else:
-                #odd_inc = 2 * index - 1
                 out_expression = out_expression + 2 / index * ui.delta_mag_list[index] * sp.cos(2 * index * sp.pi * u_o * x_var)
 
         # Time to sub in x array
@@ -198,7 +160,7 @@ def delta_processing(ui):
     plt.xlabel('Arial distance from -' + str(ui.pitch) + 'nm to ' + str(ui.pitch) + 'nm')
     plt.ylabel('Intensity')
     plt.title('Intensity Curve')
-    fig.text(.76, 0.5, out_text, ha='left')
+    fig.text(.76, 0.4, out_text, ha='left')
     fig.set_size_inches(6, 6, forward=True)
     plt.subplots_adjust(left=0.1, bottom=0.1, right=0.75, top=0.9)
     plt.show()
